@@ -8,27 +8,43 @@
 <body>
     <div class="container">
         <h1>CmanTV</h1>
-        <form id="searchForm">
-            <input type="text" id="searchInput" placeholder="Enter an IMDB movie or TV show ID" required>
-            <button type="submit">Go</button>
+        <form id="embedForm">
+            <input type="text" id="videoInput" placeholder="Enter an IMDB movie or show ID" required>
+            <button type="submit">Watch!</button>
         </form>
+        <div id="videoContainer">
+        </div>
     </div>
 
     <script>
-        document.getElementById('searchForm').addEventListener('submit', function(e) {
+        document.getElementById('embedForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const query = document.getElementById('searchInput').value.trim();
-            if (query) {
-                window.location.href = `https://cmantv.github.io/VID.html?video_id=${query}`;
+
+            const videoID = document.getElementById('videoInput').value.trim();
+            if (videoID) {
+                // Create the iframe
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://multiembed.mov/?video_id=${videoID}`;
+                iframe.width = "100%";
+                iframe.height = "500px";
+                iframe.frameBorder = "0";
+                iframe.allowFullscreen = true;
+
+ 
+                const videoContainer = document.getElementById('videoContainer');
+                videoContainer.innerHTML = ""; 
+                videoContainer.appendChild(iframe);
+
+                document.getElementById('embedForm').style.display = 'none';
             }
         });
     </script>
 </body>
 </html>
 <style>
-  body {
-    background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
+    body {
+    background-color: #f9f9f9;
+    font-family: 'Roboto', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -40,29 +56,32 @@
     background-color: #ffffff;
     padding: 20px 40px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
+    width: 90%;
+    max-width: 600px;
 }
 
 h1 {
     margin-bottom: 20px;
-    font-size: 24px;
-    color: #333333;
+    font-size: 28px;
+    color: #333;
 }
 
 input[type="text"] {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     margin-bottom: 20px;
-    border: 1px solid #cccccc;
+    border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
+    box-sizing: border-box;
 }
 
 button {
-    background-color: #007bff;
+    background-color: #28a745;
     color: white;
-    padding: 10px 20px;
+    padding: 12px 20px;
     border: none;
     border-radius: 4px;
     font-size: 16px;
@@ -71,46 +90,17 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #218838;
+}
+
+#videoContainer {
+    margin-top: 20px;
+}
+
+iframe {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 </style>
-<script>
-    <?php
-////////////////////// SUPEREMBED PLAYER SCRIPT //////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////// PLAYER SETTINGS ///////////////////////////////////////////////
-
-// do not change anything outside this section
-
-// player font - paste font name from Google fonts, replace spaces with +
-$player_font = "Poppins";
-
-// player colors - paste color code in HEX format without # eg. 123456
-$player_bg_color = "000000"; // background color
-$player_font_color = "ffffff"; // font color
-$player_primary_color = "34cfeb"; // primary color for loader and buttons
-$player_secondary_color = "6900e0"; // secondary color for hovers and elements
-
-// player loader - you can choose a loading animation from 1 to 10
-$player_loader = 1;
-
-// preferred server - you can choose server that will be on top of the list and open after
-// clicking play button, works only for quality >= 720p
-// options are: vidlox = 7, fembed = 11, mixdrop = 12, upstream = 17, videobin = 18,
-// doodstream = 21, streamtape = 25, streamsb = 26, voe = 29, ninjastream = 33
-$preferred_server = 0; // paste only server number, leave 0 for no preference
-
-// here you can choose source list style
-// 1 = button with server count and full page overlay with server list
-// 2 = button with icon and dropdown with server list
-$player_sources_toggle_type = 2;
-
-//////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////
-
-if(isset($_GET['video_id'])) { $video_id = $_GET['video_id']; $is_tmdb = 0; $season = 0; $episode = 0; $player_url = ""; if(isset($_GET['tmdb'])) { $is_tmdb = $_GET['tmdb']; } if(isset($_GET['season'])) { $season = $_GET['season']; } else if (isset($_GET['s'])) { $season = $_GET['s']; } if(isset($_GET['episode'])) { $episode = $_GET['episode']; } else if(isset($_GET['e'])) { $episode = $_GET['e']; } if(!empty(trim($video_id))) { $request_url = "https://getsuperembed.link/?video_id=$video_id&tmdb=$is_tmdb&season=$season&episode=$episode&player_font=$player_font&player_bg_color=$player_bg_color&player_font_color=$player_font_color&player_primary_color=$player_primary_color&player_secondary_color=$player_secondary_color&player_loader=$player_loader&preferred_server=$preferred_server&player_sources_toggle_type=$player_sources_toggle_type"; if(function_exists('curl_version')) { $curl = curl_init(); curl_setopt($curl, CURLOPT_URL, $request_url); curl_setopt($curl, CURLOPT_RETURNTRANSFER, true); curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true); curl_setopt($curl, CURLOPT_TIMEOUT, 7); curl_setopt($curl, CURLOPT_HEADER, false); curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE); $player_url = curl_exec($curl); curl_close($curl); } else { $player_url = file_get_contents($request_url); } if(!empty($player_url)) { if(strpos($player_url,"https://") !== false) { header("Location: $player_url"); } else { echo "<span style='color:red'>$player_url</span>"; } } else { echo "Request server didn't respond"; } } else { echo "Missing video_id"; } } else { echo "Missing video_id"; }
-
-?>
-
-</script>
